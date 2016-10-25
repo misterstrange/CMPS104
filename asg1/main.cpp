@@ -139,8 +139,9 @@ int main(int argc, char *argv[]) {
 
 
 
-    //WriteFile
+    //WriteFile basname doesn't work for whatever reason
     string outputname = basename(filename);
+    outputname = outputname.substr(0,outputname.find_last_of("."));
     outputname = outputname + ".str";
     FILE* output = fopen(outputname.c_str(), "w");
 
