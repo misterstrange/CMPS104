@@ -15,7 +15,7 @@ const string CPP = "/usr/bin/cpp";
 bool verifyOC(char* filename){
     string test = filename;
     bool check = false;
-    if (test.substr(test.find_last_of("."), 0) == ".oc"){
+    if (test.substr(test.find_last_of(".")) == ".oc"){
         check = true;
     }
     return check;
@@ -24,7 +24,7 @@ bool verifyOC(char* filename){
 void ReadPipe(const char* ComLine, string_set &line){
     FILE* pipe = popen(ComLine, "r");
     if(pipe == nullptr){
-        fprintf(stderr, "%s is not a valid command.", ComLine);
+        fprintf(stderr, "%s is not a valid command.\n", ComLine);
         exec::exit_status = EXIT_FAILURE;
         return;
     }
@@ -44,8 +44,17 @@ void ReadPipe(const char* ComLine, string_set &line){
 
 }
 
-/*Don't forget: you are using a struct instead of class,
-so you need to edit ReadPipe accordingly.*/
+
+void WriteFile(char* direct, string ext, string_set line){
+    string fn = direct;
+    fn = fn.substr(0, fn.find_last_of('.'));
+
+    fn.append(ext);
+
+    FILE* output = fopen(fn.c_str(), "w");
+    line.dump(output);
+    fclose(output);
+}
 
 
 int main(int argc, char *argv[]) {
@@ -60,16 +69,10 @@ int main(int argc, char *argv[]) {
         switch (c)
         {
         case '@':
-        /*Call set_debugflags, and use DEBUGF and DEBUGSTMT for debugging.
-        The details of the flags are at the implementor’s discretion, and are
-        not documented here. */
         set_debugflags(optarg);
         break;
 
         case 'D':
-        /*Pass this option and its argument to cpp. This is mostly useful as
-        -D__OCLIB_OH__ to suppress inclusion of the code from oclib.oh
-        when testing a program.*/
         command = CPP + " -D" + optarg + " ";
         break;
 
@@ -85,10 +88,10 @@ int main(int argc, char *argv[]) {
 
         case '?':
         if (optopt == '@'){
-            fprintf(stderr, "'@' option requires flags");
+            fprintf(stderr, "'@' option requires flags\n");
         }
         else if(optopt == 'D'){
-            fprintf(stderr, "'D' option requires string");
+            fprintf(stderr, "'D' option requires string\n");
         }
 
         }
@@ -98,7 +101,7 @@ int main(int argc, char *argv[]) {
         filename = argv[optind];
     }
     else{
-        fprintf(stderr, ".oc file not provided!");
+        fprintf(stderr, ".oc file not provided!\n");
         exec::exit_status = EXIT_FAILURE;
         return exec::exit_status;
     }
@@ -108,7 +111,7 @@ int main(int argc, char *argv[]) {
         command.append(filename);
     }
     else{
-        fprintf(stderr, "filename did not have .oc extention");
+        fprintf(stderr, "filename did not have .oc extention\n");
         exec::exit_status = EXIT_FAILURE;
         return exec::exit_status;
     }
@@ -118,7 +121,7 @@ int main(int argc, char *argv[]) {
 
     //inputs command into the shell
     ReadPipe(command.c_str(), line);
-    //WriteFile
+    WriteFile(filename, ".str", line);
 
 
 	return exec::exit_status;
