@@ -2,15 +2,27 @@
 #include <unistd.h>
 #include <string.h>
 #include <libgen.h>
+#include <errno.h>
 
 #include "auxlib.h"
 #include "string_set.h"
+
+constexpr size_t LINESIZE = 1024;
+
 
 
 
 using namespace std;
 
 const string CPP = "/usr/bin/cpp";
+
+// Chomp the last character from a buffer if it is delim. from cppstrtok.cpp
+void chomp (char* string, char delim) {
+   size_t len = strlen (string);
+   if (len == 0) return;
+   char* nlpos = string + len - 1;
+   if (*nlpos == delim) *nlpos = '\0';
+}
 
 bool verifyOC(char* filename){
     string test = filename;
@@ -21,39 +33,32 @@ bool verifyOC(char* filename){
     return check;
 }
 
-void ReadPipe(const char* ComLine, string_set &line){
-    FILE* pipe = popen(ComLine, "r");
-    if(pipe == nullptr){
-        fprintf(stderr, "%s is not a valid command.\n", ComLine);
-        exec::exit_status = EXIT_FAILURE;
-        return;
-    }
-    int LineSize = 1024;
-    char buffer[LineSize], *token, *saveptr;
+//Run cpp against the lines of the file, from cppstrtok.cpp
+void cpplines (FILE* pipe, const char* filename, string_set &line){
+    int linenr = 1;
+    char inputname[LINESIZE];
+    strcpy(inputname, filename);
+    for(;;){
+        char buffer[LINESIZE];
+        char* fgets_rc = fgets (buffer, LINESIZE,pipe);
+        if (fgets_rc == nullptr) break;
+        chomp(buffer, '\n');
+        int sscanf_rc = sscanf (buffer, "# %d \"%[^\"]\"", &linenr, inputname);
 
-    while (fgets(buffer, LineSize, pipe)){
-        token = strtok_r(buffer, " \t\n", &saveptr);
-
-        while(token){
-            if (strcmp("#", token)==0) break;
-            line.intern(token);
-            token = strtok_r(nullptr, " \t\n", &saveptr);
+        if (sscanf_rc==2){
+            continue;
         }
+
+        char* savepos = nullptr;
+        char* bufptr = buffer;
+        for (int tokenct = 1 ;; ++tokenct){
+            char* token = strtok_r (bufptr, " \t\n", &savepos);
+            bufptr = nullptr;
+            if (token == nullptr) break;
+            line.intern(token);
+        }
+        ++linenr;
     }
-    pclose(pipe);
-
-}
-
-
-void WriteFile(char* direct, string ext, string_set line){
-    string fn = direct;
-    fn = fn.substr(0, fn.find_last_of('.'));
-
-    fn.append(ext);
-
-    FILE* output = fopen(fn.c_str(), "w");
-    line.dump(output);
-    fclose(output);
 }
 
 
@@ -120,8 +125,28 @@ int main(int argc, char *argv[]) {
     exec::execname = basename(argv[0]);
 
     //inputs command into the shell
-    ReadPipe(command.c_str(), line);
-    WriteFile(filename, ".str", line);
+    FILE* pipe = popen(command.c_str(), "r");
+    if (pipe == nullptr){
+        exec::exit_status = EXIT_FAILURE;
+        fprintf(stderr, "%s: %s: %s\n", exec::execname.c_str(), command.c_str(), strerror(errno));
+    }
+    else{
+        cpplines (pipe, filename, line);
+        int pclose_rc = pclose (pipe);
+        if (pclose_rc != 0) exec::exit_status = EXIT_FAILURE;
+
+    }
+
+
+
+    //WriteFile
+    string outputname = basename(filename);
+    outputname = outputname + ".str";
+    FILE* output = fopen(outputname.c_str(), "w");
+
+    line.dump(output);
+    fclose(output);
+
 
 
 	return exec::exit_status;
