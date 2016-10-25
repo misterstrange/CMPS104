@@ -16,7 +16,8 @@ using namespace std;
 
 const string CPP = "/usr/bin/cpp";
 
-// Chomp the last character from a buffer if it is delim. from cppstrtok.cpp
+/* Chomp the last character from a buffer
+    if it is delim. from cppstrtok.cpp*/
 void chomp (char* string, char delim) {
    size_t len = strlen (string);
    if (len == 0) return;
@@ -43,7 +44,8 @@ void cpplines (FILE* pipe, const char* filename, string_set &line){
         char* fgets_rc = fgets (buffer, LINESIZE,pipe);
         if (fgets_rc == nullptr) break;
         chomp(buffer, '\n');
-        int sscanf_rc = sscanf (buffer, "# %d \"%[^\"]\"", &linenr, inputname);
+        int sscanf_rc = sscanf (buffer, "# %d \"%[^\"]\"",
+                                    &linenr, inputname);
 
         if (sscanf_rc==2){
             continue;
@@ -128,7 +130,8 @@ int main(int argc, char *argv[]) {
     FILE* pipe = popen(command.c_str(), "r");
     if (pipe == nullptr){
         exec::exit_status = EXIT_FAILURE;
-        fprintf(stderr, "%s: %s: %s\n", exec::execname.c_str(), command.c_str(), strerror(errno));
+        fprintf(stderr, "%s: %s: %s\n", exec::execname.c_str(),
+                        command.c_str(), strerror(errno));
     }
     else{
         cpplines (pipe, filename, line);
@@ -150,5 +153,5 @@ int main(int argc, char *argv[]) {
 
 
 
-	return exec::exit_status;
+    return exec::exit_status;
 }
