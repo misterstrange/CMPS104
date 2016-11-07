@@ -1,7 +1,13 @@
-# $Id: Makefile,v 1.23 2016-10-12 16:59:53-07 - - $
+GPP      = g++ -g -O0 -Wall -Wextra -std=gnu++14   
+MKDEPS   = g++ -std=gnu++14 -MM
 
-GPP      = g++ -g -O0 -Wall -Wextra -std=gnu++14
-GRIND    = valgrind --leak-check=full --show-reachable=yes
+MKFILE   = Makefile
+DEPSFILE = Makefile.deps
+SOURCES  = auxlib.cpp stringset.cpp main.cpp lyutils.cpp astree.cpp
+HEADERS  = auxlib.h stringset.h
+OBJECTS  = ${SOURCES:.cpp=.o} ${CLGEN:.cc=.o} ${CYGEN:.cc=.o}
+EXECBIN  = oc
+SRCFILES = ${HEADERS} ${SOURCES} ${MKFILE}
 
 LSOURCES = scanner.l
 YSOURCES = parser.y
@@ -11,30 +17,23 @@ CYGEN    = yyparse.cc
 LREPORT  = yylex.output
 YREPORT  = yyparse.output
 
-all : oc
+all : ${HYGEN} ${EXECBIN}
 
-oc : main.o stringset.o auxlib.o lyutils.o astree.o yyparse.o yylex.o
-	${GPP} main.o stringset.o auxlib.o lyutils.o astree.o \
-	yyparse.o yylex.o -o oc
+${EXECBIN} : ${OBJECTS}
+	${GPP} ${OBJECTS} -o ${EXECBIN}
 
 %.o : %.cpp
 	${GPP} -c $<
 
 ci :
-	cid + Makefile parser.y astree.h astree.cpp lyutils.h \
-			 lyutils.cpp yyparse.h auxlib.h auxlib.cpp \
-			 stringset.h stringset.cpp main.cpp
-
-spotless : clean
-	- rm oc test?.out test?.err
+	cid + ${SRCFILES}
 
 clean :
-	- rm *.o *.cc yyparse.h *.log *.output
+	-rm ${OBJECTS} ${DEPSFILE} ${CLGEN} ${HYGEN} ${CYGEN} \
+	${LREPORT} ${YREPORT}
 
-test : oc
-	${GRIND} oc * * >test1.out 2>test1.err
-	${GRIND} oc foo foo foo foo bar bar bar foo qux baz \
-	         >test2.out 2>test2.err
+spotless : clean
+	- rm ${EXECBIN}
 
 ${CLGEN} : ${LSOURCES}
 	flex --outfile=${CLGEN} ${LSOURCES} 2>${LREPORT}
@@ -43,13 +42,9 @@ ${CLGEN} : ${LSOURCES}
 ${CYGEN} ${HYGEN} : ${YSOURCES}
 	bison --defines=${HYGEN} --output=${CYGEN} ${YSOURCES}
 
+${DEPSFILE} :
+	${MKDEPS} ${SOURCES} ${CLGEN} ${CYGEN} >>${DEPSFILE}
 
-# Depencencies.
-astree.o: astree.cpp astree.h auxlib.h stringset.h lyutils.h yyparse.h
-lyutils.o: lyutils.cpp auxlib.h lyutils.h astree.h yyparse.h
-stringset.o: stringset.cpp stringset.h auxlib.h
-auxlib.o: auxlib.cpp auxlib.h
-main.o: main.cpp astree.h auxlib.h stringset.h lyutils.h \
- yyparse.h
-yylex.o: yylex.cc lyutils.h astree.h auxlib.h yyparse.h
-yyparse.o: yyparse.cc astree.h auxlib.h lyutils.h yyparse.h
+deps :
+	-rm ${DEPSFILE}
+	${MAKE} --no-print-directory ${DEPSFILE}
