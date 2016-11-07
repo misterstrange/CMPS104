@@ -1,0 +1,126 @@
+# depslib dependency file v1.0
+1477226494 source:/home/eric/Documents/CMPS104a/CMPS104/asg1/auxlib.cpp
+	<assert.h>
+	<errno.h>
+	<libgen.h>
+	<limits.h>
+	<stdarg.h>
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+	<wait.h>
+	"auxlib.h"
+
+1477227632 /home/eric/Documents/CMPS104a/CMPS104/asg1/auxlib.h
+	<string>
+	<stdarg.h>
+
+1477226506 source:/home/eric/Documents/CMPS104a/CMPS104/asg1/string_set.cpp
+	<string>
+	<unordered_set>
+	"string_set.h"
+
+1476422119 /home/eric/Documents/CMPS104a/CMPS104/asg1/string_set.h
+	<string>
+	<unordered_set>
+	<stdio.h>
+
+1477356659 source:/home/eric/Documents/CMPS104a/CMPS104/asg1/main.cpp
+	<iostream>
+	<unistd.h>
+	<string.h>
+	<libgen.h>
+	"auxlib.h"
+	"string_set.h"
+
+1477226494 source:/home/eric/Documents/CMPS104a/CMPS104/asg2/auxlib.cpp
+	<assert.h>
+	<errno.h>
+	<libgen.h>
+	<limits.h>
+	<stdarg.h>
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+	<wait.h>
+	"auxlib.h"
+
+1477227632 /home/eric/Documents/CMPS104a/CMPS104/asg2/auxlib.h
+	<string>
+	<stdarg.h>
+
+1477226506 source:/home/eric/Documents/CMPS104a/CMPS104/asg2/string_set.cpp
+	<string>
+	<unordered_set>
+	"string_set.h"
+
+1478556422 /home/eric/Documents/CMPS104a/CMPS104/asg2/string_set.h
+	<string>
+	<unordered_set>
+	<stdio.h>
+
+1478550689 source:/home/eric/Documents/CMPS104a/CMPS104/asg2/astree.cpp
+	<assert.h>
+	<inttypes.h>
+	<stdarg.h>
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+	"astree.h"
+	"string_set.h"
+	"lyutils.h"
+
+1478550682 /home/eric/Documents/CMPS104a/CMPS104/asg2/astree.h
+	<string>
+	<vector>
+	"auxlib.h"
+
+1478550726 /home/eric/Documents/CMPS104a/CMPS104/asg2/lyutils.h
+	<string>
+	<vector>
+	<stdio.h>
+	"astree.h"
+	"auxlib.h"
+	"yyparse.h"
+
+1478555420 /home/eric/Documents/CMPS104a/CMPS104/asg2/yyparse.h
+
+1478550729 source:/home/eric/Documents/CMPS104a/CMPS104/asg2/lyutils.cpp
+	<assert.h>
+	<ctype.h>
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+	"auxlib.h"
+	"lyutils.h"
+
+1478556711 source:/home/eric/Documents/CMPS104a/CMPS104/asg2/main.cpp
+	<iostream>
+	<unistd.h>
+	<string.h>
+	<libgen.h>
+	<errno.h>
+	<fstream>
+	<cstdlib>
+	<string>
+	<vector>
+	<stdio.h>
+	"auxlib.h"
+	"string_set.h"
+	"lyutils.h"
+	"astree.h"
+
+1478555426 source:/home/eric/Documents/CMPS104a/CMPS104/asg2/yyparse.cpp
+	<assert.h>
+	<stdlib.h>
+	<string.h>
+	"astree.h"
+	"lyutils.h"
+	<stddef.h>
+	<libintl.h>
+	<alloca.h>
+	<malloc.h>
+	<stdlib.h>
+	<stdlib.h>
+	<stdio.h>
+
