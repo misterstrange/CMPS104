@@ -72,6 +72,18 @@ void lexer::include() {
    }
 }
 
+
+int yylval_token(int symbol) {
+
+   yylval = new astree(symbol, lexer::lloc, yytext);
+   fprintf(tok_file, " %4ld   %4.3f  %4d  %-16s  (%s)\n",
+           lexer::lloc.filenr, lexer::lloc.linenr +
+           lexer::lloc.offset/1000.0, symbol,
+           get_yytname(symbol), yytext);
+
+   return symbol;
+}
+
 void yyerror (const char* message) {
    assert (not lexer::filenames.empty());
    errllocprintf (lexer::lloc, "%s\n", message);
