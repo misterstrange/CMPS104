@@ -1,3 +1,5 @@
+// Code provided by Wesley Mackey
+
 %{
 // Dummy parser for scanner project.
 
@@ -14,9 +16,9 @@
 %token-table
 %verbose
 
-%token TOK_VOID TOK_BOOL TOK_CHAR TOK_INT TOK_STRING
+%token TOK_VOID TOK_CHAR TOK_INT TOK_STRING
 %token TOK_IF TOK_ELSE TOK_WHILE TOK_RETURN TOK_STRUCT
-%token TOK_FALSE TOK_TRUE TOK_NULL TOK_NEW TOK_ARRAY
+%token TOK_NULL TOK_NEW TOK_ARRAY
 %token TOK_EQ TOK_NE TOK_LT TOK_LE TOK_GT TOK_GE
 %token TOK_IDENT TOK_INTCON TOK_CHARCON TOK_STRINGCON
 
@@ -31,9 +33,9 @@
 program : program token | ;
 token   : '(' | ')' | '[' | ']' | '{' | '}' | ';' | ',' | '.'
         | '=' | '+' | '-' | '*' | '/' | '%' | '!'
-        | TOK_VOID | TOK_BOOL | TOK_CHAR | TOK_INT | TOK_STRING
+        | TOK_VOID | TOK_CHAR | TOK_INT | TOK_STRING
         | TOK_IF | TOK_ELSE | TOK_WHILE | TOK_RETURN | TOK_STRUCT
-        | TOK_FALSE | TOK_TRUE | TOK_NULL | TOK_NEW | TOK_ARRAY
+        | TOK_NULL | TOK_NEW | TOK_ARRAY
         | TOK_EQ | TOK_NE | TOK_LT | TOK_LE | TOK_GT | TOK_GE
         | TOK_IDENT | TOK_INTCON | TOK_CHARCON | TOK_STRINGCON
         | TOK_ORD | TOK_CHR | TOK_ROOT
@@ -41,6 +43,9 @@ token   : '(' | ')' | '[' | ']' | '{' | '}' | ';' | ',' | '.'
 
 %%
 
+const char *parser::get_tname (int symbol) {
+   return yytname [YYTRANSLATE (symbol)];
+}
 
 const char *get_yytname (int symbol) {
    return yytname [YYTRANSLATE (symbol)];
@@ -58,3 +63,4 @@ static void* yycalloc (size_t size) {
    return result;
 }
 */
+

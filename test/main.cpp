@@ -1,150 +1,166 @@
-#include <cstdlib>
-#include <iostream>
-#include <fstream>
-#include <string>
-#include <vector>
-#include <libgen.h>
-#include <unistd.h>
-#include <stdio.h>
-#include <string.h>
+/* Juan Gonzalez
+   1497521
+    CMPS104a Assignment 1
 
+    DEBUGGING
+    -@
+    @ - Enable all debug flags
+    f - Debug filename
+    o - Debug command line to pipe
+*/
+
+#include <iostream>
+#include <string>
 using namespace std;
 
-#include "stringset.h"
+#include <stdio.h>
+#include <unistd.h>
+#include <libgen.h>
+#include <string.h>
+
 #include "auxlib.h"
 #include "lyutils.h"
 #include "astree.h"
+#include "stringset.h"
 
-const string CPP = "/usr/bin/cpp";
-string cpp_command;
-FILE *tok_file;
+struct file_op {
 
-void cpp_pclose() {
-    int pclose_rc = pclose (yyin);
-    eprint_status (cpp_command.c_str(), pclose_rc);
-    if (pclose_rc != 0) exit (EXIT_FAILURE);
-}
+    char * file_name;
+    string commands = "cpp ";
+};
+FILE * tok_file;
 
-// grab each token with yylex(), intern it into the stringset, as well
-// as writing it to the program.tok file
-void scan (string filename) {
+// Scans through command line options using optget(3)
+void options( int argc, char * argv[],
+    const char * options, file_op &ops ) {
 
-    string basefile(basename(const_cast<char*> (filename.c_str())));
+    yy_flex_debug = yydebug = 0;
 
-    char* tokenfile = strdup((basefile.substr(0, basefile.length()-3) + 
-                        ".tok").c_str());
+    int op;
+    while ( (op = getopt( argc, argv, options )) != -1 ) {
 
+        switch ( op ) {
 
-    tok_file = fopen (tokenfile, "w");
-    if (tok_file == NULL) {
-        cout << "Error opening file";
-    } else {
-        for (;;) {
-            int token = yylex();
+            case 'l':
+                yy_flex_debug = 1;
+                break;
 
-            if (yy_flex_debug) fflush (NULL);
-            if (token == YYEOF) break;
+            case 'y':
+                yydebug = 1;
+                break;
 
-            const string* tok = intern_stringset (yytext);
-            (void)tok;
+            case '@':
+                set_debugflags(optarg);
+                break;
 
-            DEBUGF('m', "token=%d", token);
-        }
-    }
-    fprintf (tok_file, "test\n");
-    fclose (tok_file);
-    cpp_pclose ();
-}
+            case 'D':
+                ops.commands.append("-D ");
+                ops.commands.append(optarg );
+                ops.commands.append(" ");
+                break;
 
-// Open a pipe from the C preprocessor.
-// Exit failure if can't.
-// Assigns opened pipe to FILE* yyin.
-void cpp_popen (string filename) {
-    yyin = popen (cpp_command.c_str(), "r");
-    if (yyin == NULL) {
-        syserrprintf (cpp_command.c_str());
-    }else {
-        if (yy_flex_debug) {
-            fprintf (stderr, "-- popen (%s), fileno(yyin) = %d\n",
-                        cpp_command.c_str(), fileno (yyin));
-        }
-        lexer_newfilename (cpp_command.c_str());
-        scan (filename);
-    }
-}
+            case '?':
 
-// scan options, then proceed to file scanner
-void scan_opts (int argc, char** argv, string filename) {
-    int opt;
-
-    opterr = 0;
-    yy_flex_debug = 0;
-    yydebug = 0;
-
-    size_t i = filename.rfind('.', filename.length());
-
-    if (i == string::npos || filename.substr(i, 
-                filename.length()-i) != ".oc") {
-        cerr << "Incorrect input file. Please provide a .oc file" 
-                                                        << endl;
-        exit(EXIT_FAILURE);
-    } else {
-        while ((opt = getopt (argc, argv, "@:D:ly")) != -1) {
-            switch (opt) {
-                case 'l':
-                    yy_flex_debug = 1;
-                    break;
-                case 'y':
-                    yydebug = 1;
-                    break;
-                case '@':
-                    set_debugflags (optarg);
-                    break;
-                case 'D':
-                    cpp_command = CPP + " -D" + optarg + " "
-                                     + argv[argc-1];
-                    break;
-                default:
-                    errprintf ("bad option (%c)\n", opt);
-                    break;
-            }
+                if ( optopt == '@' || optopt == 'D' )
+                    fprintf(stderr, "-%c needs an argument\n", optopt);
+                else
+                    fprintf(stderr, "Invalid option: -%c\n", optopt);
         }
     }
 
-    if (optind > argc) {
-        errprintf ("Usage: oc [-ly] [-@ flag ...] [-D string] %s\n",
-                      "program.oc");
-        exit (EXIT_FAILURE);
-    }
+    if ( argc > optind ) {
 
-    // open file by piping through CPP
-    cpp_popen (filename);
+        DEBUGF( 'f', "argv[optind] = %s\n", argv[optind] );
+        ops.file_name = &*argv[optind];
+    }
+    else
+        ops.file_name = nullptr;
 }
 
-int main (int argc, char* argv[]) {
-    vector<string> args (&argv[1], &argv[argc]);
+// Used to verify whether the file is a proper .oc
+// Returns a bool true if valid - false if invalid
+bool verify( char * file_name ) {
 
-    string filename = argv[argc-1];
-    char* filename2 = argv[argc-1];
-    cpp_command = CPP + " " + filename2;
-    ofstream strfile;
-    set_execname(argv[0]);
-    string basefile(basename(const_cast<char*> (filename.c_str())));
- 
-    // scan the options, then begin to scan input file
-    scan_opts (argc, argv, filename);
+    char * pos = strrchr(file_name, '.');
 
-    // open the program.str file to dump the stringset
-    strfile.open(basefile.substr(0, basefile.length()-3) + ".str");
-    
-    for (const string& arg: args) {
-        const string* str = intern_stringset (arg.c_str());
-        strfile << "intern(" << arg << ") returned " << str << "->\"" 
-                                            << *str << "\"" << endl;
-    }
-    dump_stringset (strfile);
-    strfile.close();
+    bool check = pos && (strcmp(pos, ".oc") == 0);
+    DEBUGF( 'f', "File Verification: %d\n", check );
 
-
-    return EXIT_SUCCESS;
+    return check;
 }
+
+void read_pipe( const char * cmd_line) {
+
+    yyin = popen(cmd_line, "r");
+    if ( !yyin ) {
+
+        fprintf(stderr, "Error running cpp!");
+        set_exitstatus( EXIT_FAILURE );
+        return;
+    }
+
+    while (true) {
+
+        int token = yylex();
+        if (token == YYEOF) break;
+
+        stringset::intern_stringset (yytext);
+    }
+
+    pclose(yyin);
+}
+
+void write_file( char * path, string extension) {
+
+    string file_name = path;
+    file_name = file_name.substr(0, file_name.find_last_of('.'));
+    DEBUGF('f', "Basename: %s\n", file_name.c_str());
+
+    file_name.append(extension);
+    DEBUGF('f', "Writing to file -> %s\n", file_name.c_str());
+
+    FILE * output = fopen(file_name.c_str(), "w");
+    stringset::dump_stringset(output);
+    fclose(output);
+}
+
+void open_tok( char * path, string extension) {
+
+    string file_name = path;
+    file_name = file_name.substr(0, file_name.find_last_of('.'));
+    file_name.append(extension);
+    tok_file = fopen(file_name.c_str(), "w");
+}
+
+void close_tok() {
+    fclose(tok_file);
+}
+
+int main( int argc, char * argv[] ) {
+
+    char execname[] = "Hello";
+    set_execname(execname);
+
+    file_op ops;
+    options(argc, argv, "ly@:D:", ops);
+    DEBUGF( 'f', "File Name: %s\n", ops.file_name );
+    if ( !ops.file_name || !verify(ops.file_name) ) {
+
+        fprintf(stderr, "Invalid .oc file or was not provided!");
+        set_exitstatus( EXIT_FAILURE );
+        return get_exitstatus();
+    }
+
+    ops.commands.append(ops.file_name);
+    DEBUGF( 'o', "CPP command line: %s\n", ops.commands.c_str() );
+
+    stringset set;
+
+    open_tok(ops.file_name, ".tok");
+    read_pipe(ops.commands.c_str());
+    write_file(ops.file_name, ".str");
+    close_tok();
+
+    return get_exitstatus();
+}
+

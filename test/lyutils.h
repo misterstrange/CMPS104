@@ -1,7 +1,13 @@
-#ifndef __LYUTILS_H__
-#define __LYUTILS_H__
+// Code provided by Wesley Mackey
+
+#ifndef __UTILS_H__
+#define __UTILS_H__
 
 // Lex and Yacc interface utility.
+
+#include <string>
+#include <vector>
+using namespace std;
 
 #include <stdio.h>
 
@@ -10,38 +16,40 @@
 
 #define YYEOF 0
 
-typedef size_t yy_size_t;
-
 extern FILE* yyin;
-extern astree* yyparse_astree;
-extern int yyin_linenr;
-extern char* yytext;
+extern char* yytext; 
 extern int yy_flex_debug;
 extern int yydebug;
-extern yy_size_t yyleng;
+extern size_t yyleng; 
 
-int yylex (void);
-int yyparse (void);
+int yylex();
+int yylex_destroy();
+int yyparse();
 void yyerror (const char* message);
-int yylex_destroy (void);
-const char* get_yytname (int symbol);
-bool is_defined_token (int symbol);
+const char * get_yytname (int symbol);
+int yylval_token(int symbol);
 
-const string* lexer_filename (int filenr);
-void lexer_newfilename (const char* filename);
-void lexer_badchar (unsigned char bad);
-void lexer_badtoken (char* lexeme);
-void lexer_newline (void);
-void lexer_setecho (bool echoflag);
-void lexer_useraction (void);
+struct lexer {
+   static bool interactive;
+   static location lloc;
+   static size_t last_yyleng;
+   static vector<string> filenames;
+   static const string* filename (int filenr);
+   static void newfilename (const string& filename);
+   static void advance();
+   static void newline();
+   static void badchar (unsigned char bad);
+   static void badtoken (char* lexeme);
+   static void include(); 
+};
 
-astree* new_parseroot (void);
-int yylval_token (int symbol);
+struct parser {
+   static astree* root;
+   static const char* get_tname (int symbol);
+};
 
-void lexer_include (void);
-
-typedef astree* astree_pointer;
-#define YYSTYPE astree_pointer
+#define YYSTYPE astree*
 #include "yyparse.h"
 
 #endif
+

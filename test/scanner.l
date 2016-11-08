@@ -1,12 +1,10 @@
-/* $Id: scanner.l,v 1.4 2015-11-13 13:50:39-08 - - $ */
-
 %{
 
 #include "lyutils.h"
 
-#define YY_USER_ACTION { lexer_useraction(); }
+#define YY_USER_ACTION { lexer::advance(); }
 
-#define RETURN(SYMBOL) { return yylval_token(SYMBOL); }
+#define RETURN(SYM) { return yylval_token(SYM); }
 
 %}
 
@@ -26,61 +24,62 @@ CHAR            ('([^\\'\n]|\\[\\'"0nt])')
 STRING          (\"([^\\"\n]|\\[\\'"0nt])*\")
 IDENT           ({LETTER}({LETTER}|{DIGIT})*)
 
+BAD_IDENT       ({DIGIT}+{LETTER}({LETTER}|{DIGIT})*)
+BAD_CHAR        ('([^\\'\n]|\\[\\'"0nt]?)[^']?)
+BAD_STRING      (\"([^\\"\n]|\\[\\'"0nt])*[^\"]?)
 
 %%
 
-"#".*           { lexer_include(); }
+"#".*           { lexer::include(); }
 [ \t]+          { }
-\n              { lexer_newline(); }
+\n              { lexer::newline(); }
 
-
-"void"          { RETURN (TOK_VOID); }
-"bool"          { RETURN (TOK_BOOL); }
-"char"          { RETURN (TOK_CHAR); }
-"int"           { RETURN (TOK_INT); }
+"char"          { RETURN (TOK_CHAR);   }
+"else"          { RETURN (TOK_ELSE);   }
+"if"            { RETURN (TOK_IF);     }
+"int"           { RETURN (TOK_INT);    }
+"new"           { RETURN (TOK_NEW);    }
+"null"          { RETURN (TOK_NULL);   }
+"return"        { RETURN (TOK_RETURN); }
 "string"        { RETURN (TOK_STRING); }
 "struct"        { RETURN (TOK_STRUCT); }
-"if"            { RETURN (TOK_IF); }
-"else"          { RETURN (TOK_ELSE); }
-"while"         { RETURN (TOK_WHILE); }
-"return"        { RETURN (TOK_RETURN); }
-"false"         { RETURN (TOK_FALSE); }
-"true"          { RETURN (TOK_TRUE); }
-"null"          { RETURN (TOK_NULL); }
-"ord"           { RETURN (TOK_ORD); }
-"chr"           { RETURN (TOK_CHR); }
-"new"           { RETURN (TOK_NEW); }
+"void"          { RETURN (TOK_VOID);   }
+"while"         { RETURN (TOK_WHILE);  }
 
-"=="            { RETURN (TOK_EQ); }
+{IDENT}         { RETURN (TOK_IDENT);     }
+{INTEGER}       { RETURN (TOK_INTCON);    }
+{CHAR}          { RETURN (TOK_CHARCON);   }
+{STRING}        { RETURN (TOK_STRINGCON); }
+
 "!="            { RETURN (TOK_NE); }
 "<="            { RETURN (TOK_LE); }
+"=="            { RETURN (TOK_EQ); }
 ">="            { RETURN (TOK_GE); }
 
-{CHAR}          { RETURN (TOK_CHARCON); }
-{STRING}        { RETURN (TOK_STRINGCON); }
-{INTEGER}       { RETURN (TOK_INTCON); }
-{IDENT}         { RETURN (TOK_IDENT); }
+"!"             { RETURN ('!');    }
+"%"             { RETURN ('%');    } 
+"("             { RETURN ('(');    }
+")"             { RETURN (')');    }
+"*"             { RETURN ('*');    }
+"+"             { RETURN ('+');    }
+","             { RETURN (',');    }
+"-"             { RETURN ('-');    }
+"."             { RETURN ('.');    }
+"/"             { RETURN ('/');    }
+";"             { RETURN (';');    }
+"<"             { RETURN ('<');    }
+"="             { RETURN ('=');    }
+">"             { RETURN ('>');    }
+"["             { RETURN ('[');    }
+"]"             { RETURN (']');    }
+"{"             { RETURN ('{');    }
+"}"             { RETURN ('}');    }
+"[]"            { RETURN (TOK_ARRAY); }
 
-"[]"            { RETURN ('[]'); }
-"("             { RETURN ('('); }
-")"             { RETURN (')'); }
-"["             { RETURN ('['); }
-"]"             { RETURN (']'); }
-"{"             { RETURN ('{'); }
-"}"             { RETURN ('}'); }
-";"             { RETURN (';'); }
-","             { RETURN (','); }
-"."             { RETURN ('.'); }
-"="             { RETURN ('='); }
-"<"             { RETURN ('<'); }
-">"             { RETURN ('>'); }
-"+"             { RETURN ('+'); }
-"-"             { RETURN ('-'); }
-"*"             { RETURN ('*'); }
-"/"             { RETURN ('/'); }
-"%"             { RETURN ('%'); }
-"!"             { RETURN ('!'); }
 
-.               { lexer_badchar (*yytext); }
+{BAD_IDENT}     { lexer::badtoken(yytext); }
+{BAD_CHAR}      { lexer::badtoken(yytext); }
+{BAD_STRING}    { lexer::badtoken(yytext); }
+.               { lexer::badchar(*yytext); }
 
 %%
