@@ -1,5 +1,5 @@
 GPP      = g++ -g -O0 -Wall -Wextra -std=gnu++14   
-MKDEPS   = g++ -std=gnu++14 -MM
+MKDEPS   = g++ -g -O0 -Wall -Wextra -std=gnu++14 -MM
 
 MKFILE   = Makefile
 DEPSFILE = Makefile.deps
