@@ -1,4 +1,4 @@
-// $Id: lyutils.h,v 1.5 2016-10-20 13:48:57-07 - - $
+// Code provided by Wesley Mackey
 
 #ifndef __UTILS_H__
 #define __UTILS_H__
@@ -17,10 +17,10 @@ using namespace std;
 #define YYEOF 0
 
 extern FILE* yyin;
-extern char* yytext;
+extern char* yytext; 
 extern int yy_flex_debug;
 extern int yydebug;
-extern size_t yyleng;
+extern size_t yyleng; 
 
 int yylex();
 int yylex_destroy();
@@ -28,7 +28,6 @@ int yyparse();
 void yyerror (const char* message);
 const char * get_yytname (int symbol);
 int yylval_token(int symbol);
-
 
 struct lexer {
    static bool interactive;
@@ -41,7 +40,7 @@ struct lexer {
    static void newline();
    static void badchar (unsigned char bad);
    static void badtoken (char* lexeme);
-   static void include();
+   static void include(); 
 };
 
 struct parser {
@@ -49,8 +48,7 @@ struct parser {
    static const char* get_tname (int symbol);
 };
 
-#define YYSTYPE_IS_DECLARED
-typedef astree* YYSTYPE;
+#define YYSTYPE astree*
 #include "yyparse.h"
 
 #endif

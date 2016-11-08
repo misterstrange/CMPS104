@@ -1,4 +1,5 @@
-// $Id: lyutils.cpp,v 1.3 2016-10-06 16:42:35-07 - - $
+// Code provided by Wesley Mackey
+// Slightly modified for printing to .tok file
 
 #include <assert.h>
 #include <ctype.h>
@@ -9,7 +10,7 @@
 #include "auxlib.h"
 #include "lyutils.h"
 
-extern FILE* tok_file;
+extern FILE * tok_file;
 
 bool lexer::interactive = true;
 location lexer::lloc = {0, 1, 0};
@@ -52,12 +53,12 @@ void lexer::badchar (unsigned char bad) {
                   buffer);
 }
 
-
 void lexer::badtoken (char* lexeme) {
    errllocprintf (lexer::lloc, "invalid token (%s)\n", lexeme);
 }
 
 void lexer::include() {
+
    size_t linenr;
    static char filename[0x1000];
    assert (sizeof filename > strlen (yytext));
@@ -69,18 +70,19 @@ void lexer::include() {
          fprintf (stderr, "--included # %zd \"%s\"\n",
                   linenr, filename);
       }
+
+      fprintf (tok_file, "# %3ld  \"%s\"\n", linenr, filename);
       lexer::lloc.linenr = linenr - 1;
       lexer::newfilename (filename);
    }
 }
 
-
 int yylval_token(int symbol) {
 
    yylval = new astree(symbol, lexer::lloc, yytext);
    fprintf(tok_file, " %4ld   %4.3f  %4d  %-16s  (%s)\n",
-           lexer::lloc.filenr, lexer::lloc.linenr +
-           lexer::lloc.offset/1000.0, symbol,
+           lexer::lloc.filenr, lexer::lloc.linenr + 
+           lexer::lloc.offset/1000.0, symbol, 
            get_yytname(symbol), yytext);
 
    return symbol;
