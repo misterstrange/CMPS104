@@ -11,7 +11,7 @@
 #include "lyutils.h"
 
 constexpr size_t LINESIZE = 1024;
-extern FILE * tok_file;
+FILE * tok_file;
 
 
 

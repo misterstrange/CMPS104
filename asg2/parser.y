@@ -46,6 +46,9 @@ const char *parser::get_tname (int symbol) {
    return yytname [YYTRANSLATE (symbol)];
 }
 
+const char *get_yytname (int symbol) {
+   return yytname [YYTRANSLATE (symbol)];
+}
 
 bool is_defined_token (int symbol) {
    return YYTRANSLATE (symbol) > YYUNDEFTOK;
