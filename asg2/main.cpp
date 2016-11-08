@@ -32,6 +32,8 @@ bool verifyOC(char* filename){
 
 int main(int argc, char *argv[]) {
     char* filename;
+    yy_flex_debug = yydebug = 0;
+
 
     string command = CPP + " ";
 
