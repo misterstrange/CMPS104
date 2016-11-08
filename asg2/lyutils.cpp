@@ -9,6 +9,8 @@
 #include "auxlib.h"
 #include "lyutils.h"
 
+extern FILE* tok_file;
+
 bool lexer::interactive = true;
 location lexer::lloc = {0, 1, 0};
 size_t lexer::last_yyleng = 0;
