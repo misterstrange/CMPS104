@@ -11,6 +11,7 @@
 #include "lyutils.h"
 
 constexpr size_t LINESIZE = 1024;
+extern FILE * tok_file;
 
 
 
@@ -93,7 +94,7 @@ int main(int argc, char *argv[]) {
     string outtok = basename(filename);
     outtok = outtok.substr(0,outtok.find_last_of("."));
     outtok = outtok + ".tok";
-    FILE* tok_file = fopen(outtok.c_str(), "w");
+    tok_file = fopen(outtok.c_str(), "w");
 
     //reads file and puts through cpp
     yyin = popen(command.c_str(), "r");
