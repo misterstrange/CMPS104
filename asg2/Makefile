@@ -3,8 +3,8 @@ MKDEPS   = g++ -std=gnu++14 -MM
 
 MKFILE   = Makefile
 DEPSFILE = Makefile.deps
-SOURCES  = auxlib.cpp stringset.cpp main.cpp lyutils.cpp astree.cpp
-HEADERS  = auxlib.h stringset.h
+SOURCES  = auxlib.cpp string_set.cpp main.cpp lyutils.cpp astree.cpp
+HEADERS  = auxlib.h string_set.h
 OBJECTS  = ${SOURCES:.cpp=.o} ${CLGEN:.cc=.o} ${CYGEN:.cc=.o}
 EXECBIN  = oc
 SRCFILES = ${HEADERS} ${SOURCES} ${MKFILE}
