@@ -1,6 +1,3 @@
-// Code provided by Wesley Mackey
-// Slightly modified for printing to .tok file
-
 #include <assert.h>
 #include <ctype.h>
 #include <stdio.h>
